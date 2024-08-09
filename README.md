@@ -55,10 +55,11 @@ Our experiments are conducted on public Flickr30k and MS-COCO datasets, that pro
 ————————————————  
 All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
 ## Data process, training, and inference
-### For pseudo-query in the Flickr dataset
+### Pseudo-query
 We train the openflamingo to generate the pseudo-queries for test images.  
-The pseudo queries serve as the semantic identifiers and also used for enhance memorization of the test images. 
+The pseudo queries serve as the semantic identifiers and are also used to enhance the memorization of the test images. 
 You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets.  
+Or you could also train the model to generate the pseudo-queries as follows.  
 Generate the image-to-caption data:
 ```bash
 python ./data_process/convert_flicker30k_to_wds_i2t.py --output_dir ./data/Openflamingo_format/flicker30k_i2t --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images
@@ -73,7 +74,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nnodes=1 --nproc_per_node=4 ./open_flami
   --batch_size_mmc4 64 \
   --train_num_samples_mmc4 1200000 \
   --workers=4 \
-  --run_name ../data/checkpoints/flicker30k_i2t \
+  --run_name ./data/checkpoints/flicker30k_i2t \
   --learning_rate 1e-4 \
   --lr_scheduler constant \
   --num_epochs 1 \
@@ -97,30 +98,30 @@ CUDA_VISIBLE_DEVICES=1 torchrun --nnodes=1 --nproc_per_node=1 --master_port=1996
     --lm_path anas-awadalla/mpt-1b-redpajama-200b \
     --lm_tokenizer_path anas-awadalla/mpt-1b-redpajama-200b \
     --cross_attn_every_n_layers 1 \
-    --checkpoint_path ../data/checkpoints/flicker30k_i2t/checkpoint_2.pt \
+    --checkpoint_path ./data/checkpoints/flicker30k_i2t/checkpoint_2.pt \
     --results_file results.json \
     --precision fp32 \
     --batch_size 8 \
     --generate_pseudo_query \
     --shots 0 \
-    --flickr_image_dir_path "../data/Flickr30K/flickr30k-images" \
-    --flickr_karpathy_json_path "../data/dataset_flickr30k.json" \
-    --flickr_annotations_json_path "../data/dataset_flickr30k_coco_style.json" \
-    --decoder_trie_path "../data/Openflamingo_format/caption_trie_test_set.pkl"
+    --flickr_image_dir_path "./data/Flickr30K/flickr30k-images" \
+    --flickr_karpathy_json_path "./data/dataset_flickr30k.json" \
+    --flickr_annotations_json_path "./data/dataset_flickr30k_coco_style.json" \
+    --decoder_trie_path "./data/Openflamingo_format/caption_trie_test_set.pkl"
 ```
 
 ### For numeric identifiers in the Flickr dataset
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2numeric_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type numeric_identifier
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_i2numeric_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type numeric_identifier
 ```
 Generate the query-to-identifier (learning to retrieve) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2numeric_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type numeric_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_t2numeric_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type numeric_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl
 ```
 Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
 ```bash
-python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/flicker/numeric_id_trie_test_set.pkl" --json_file ../data/dataset_flickr30k.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl --identifier_type numeric_identifier
+python get_trie_dict_4structured_id.py --output_dir "./data/Openflamingo_format/flicker/numeric_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl --identifier_type numeric_identifier
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -184,16 +185,16 @@ conda activate openflamingo_deepspeed
 ### For string identifiers in the Flickr dataset
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2string_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type string_identifier
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_i2string_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type string_identifier
 ```
 Generate the query-to-identifier (learning to retrieve) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2string_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type string_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2string_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_t2string_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type string_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2string_id_dict.pkl
 ```
 Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
 ```bash
 python get_trie_dict_4structured_id.py --output_dir "../
-data/Openflamingo_format/flicker/string_id_trie_test_set.pkl" --json_file ../data/dataset_flickr30k.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2string_id_dict.pkl --identifier_type string_identifier
+data/Openflamingo_format/flicker/string_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2string_id_dict.pkl --identifier_type string_identifier
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -257,15 +258,15 @@ conda activate openflamingo_deepspeed
 ### For semantic identifiers in the Flickr dataset
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2semantic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type semantic_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_i2semantic_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type semantic_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json
 ```
 Generate the query-to-identifier (learning to retrieve) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2semantic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type semantic_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/flicker30k_i2semantic_id/image_name2semantic_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_t2semantic_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type semantic_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ./data/Openflamingo_format/flicker/flicker30k_i2semantic_id/image_name2semantic_id_dict.pkl
 ```
 Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
 ```bash
-python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/flicker/semantic_id_trie_test_set.pkl" --json_file ../data/dataset_flickr30k.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2semantic_id_dict.pkl --identifier_type semantic_identifier
+python get_trie_dict_4structured_id.py --output_dir "./data/Openflamingo_format/flicker/semantic_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2semantic_id_dict.pkl --identifier_type semantic_identifier
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -329,19 +330,19 @@ for file in $(find ./checkpoints/deepspeed3_bf16_i2id_t2id_semantic_id); do
 ### For structured identifiers in the Flickr dataset
 Generate the structured identifiers:
 ```bash
-python data_process/structured_id.py --dataset ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images
+python data_process/structured_id.py --dataset ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images
 ```
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2structured_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type structured_identifier --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_i2structured_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type structured_identifier --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl
 ```
 Generate the query-to-identifier (learning to retrieve) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2structured_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type structured_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_t2structured_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type structured_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl
 ```
 Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
 ```bash
-python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/flicker/structured_id_trie_test_set.pkl" --json_file ../data/dataset_flickr30k.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl --id2image_name_dict ../data/Openflamingo_format/flicker/structured_id2image_name_dict.pkl --identifier_type structured_identifier
+python get_trie_dict_4structured_id.py --output_dir "./data/Openflamingo_format/flicker/structured_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl --id2image_name_dict ./data/Openflamingo_format/flicker/structured_id2image_name_dict.pkl --identifier_type structured_identifier
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -407,15 +408,15 @@ conda activate openflamingo_deepspeed
 ### For atomic identifiers in the Flickr dataset
 Generate clip embeddings for images:
 ```bash
-python data_process/structured_id.py --dataset ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images
+python data_process/structured_id.py --dataset ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images
 ```
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2automatic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type automatic_identifier
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_i2automatic_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type automatic_identifier
 ```
 Generate the query-to-identifier (learning to retrieve) data:
 ```bash
-python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2automatic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type automatic_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2automatic_id_dict.pkl
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Openflamingo_format/flicker/flicker30k_t2automatic_id --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images --identifier_type automatic_identifier --pseudo_query ./data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2automatic_id_dict.pkl
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -475,3 +476,14 @@ done
 eval "$(conda shell.bash hook)"
 conda activate openflamingo_deepspeed
 ```
+### For CoCo dataset
+You can adjust the corresponding dataset augmentation to reproduce the results for the CoCo dataset.
+## Checkpoints download
+You can directly download our trained checkpoints to skip the training process. However, I am currently looking for space to upload the large checkpoint files.
+## Contact
+If there is any problem, please email liyongqi0@gmail.com. Please do not hesitate to email me directly as I do not frequently check GitHub issues.
+
+
+
+
+
