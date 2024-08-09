@@ -55,6 +55,60 @@ Our experiments are conducted on public Flickr30k and MS-COCO datasets, that pro
 ————————————————  
 All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
 ## Data process, training, and inference
+### For pseudo-query in the Flickr dataset
+We train the openflamingo to generate the pseudo-queries for test images.  
+The pseudo queries serve as the semantic identifiers and also used for enhance memorization of the test images. 
+You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets.  
+Generate the image-to-caption data:
+```bash
+python ./data_process/convert_flicker30k_to_wds_i2t.py --output_dir ./data/Openflamingo_format/flicker30k_i2t --json_file ./data/dataset_flickr30k.json --image_dir ./data/Flickr30K/flickr30k-images
+```
+Training:
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nnodes=1 --nproc_per_node=4 ./open_flamingo/open_flamingo/train/finetuning.py \
+  --lm_path anas-awadalla/mpt-1b-redpajama-200b \
+  --tokenizer_path anas-awadalla/mpt-1b-redpajama-200b \
+  --cross_attn_every_n_layers 1 \
+  --dataset_resampled \
+  --batch_size_mmc4 64 \
+  --train_num_samples_mmc4 1200000 \
+  --workers=4 \
+  --run_name ../data/checkpoints/flicker30k_i2t \
+  --learning_rate 1e-4 \
+  --lr_scheduler constant \
+  --num_epochs 1 \
+  --warmup_steps  100 \
+  --mmc4_textsim_threshold 0.01 \
+  --mmc4_shards "./data/Openflamingo_format/coco/flicker30k_i2t/{000000000..000000082}.tar" \
+  --logging_steps 1 \
+  --mmc4_max_num_images 1 \
+  --precision bf16 \
+  --pretrained_checkpoint openflamingo/OpenFlamingo-3B-vitl-mpt1b \
+  --gradient_checkpointing \
+  --fsdp \
+  --fsdp_use_orig_params \
+  --unfreeze_all
+```
+Inference (generate pseudo queries for images in the test set):
+```bash
+CUDA_VISIBLE_DEVICES=1 torchrun --nnodes=1 --nproc_per_node=1 --master_port=1996 ./open_flamingo/open_flamingo/eval/evaluate.py \
+    --vision_encoder_path ViT-L-14 \
+    --vision_encoder_pretrained openai\
+    --lm_path anas-awadalla/mpt-1b-redpajama-200b \
+    --lm_tokenizer_path anas-awadalla/mpt-1b-redpajama-200b \
+    --cross_attn_every_n_layers 1 \
+    --checkpoint_path ../data/checkpoints/flicker30k_i2t/checkpoint_2.pt \
+    --results_file results.json \
+    --precision fp32 \
+    --batch_size 8 \
+    --generate_pseudo_query \
+    --shots 0 \
+    --flickr_image_dir_path "../data/Flickr30K/flickr30k-images" \
+    --flickr_karpathy_json_path "../data/dataset_flickr30k.json" \
+    --flickr_annotations_json_path "../data/dataset_flickr30k_coco_style.json" \
+    --decoder_trie_path "../data/Openflamingo_format/caption_trie_test_set.pkl"
+```
+
 ### For numeric identifiers in the Flickr dataset
 Generate the image-to-identifier (learning to memorize) data:
 ```bash
