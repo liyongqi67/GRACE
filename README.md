@@ -350,3 +350,74 @@ done
 eval "$(conda shell.bash hook)"
 conda activate openflamingo_deepspeed
 ```
+### For atomic identifiers in the Flickr dataset
+Generate clip embeddings for images:
+```bash
+python data_process/structured_id.py --dataset ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images
+```
+Generate the image-to-identifier (learning to memorize) data:
+```bash
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2automatic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type automatic_identifier
+```
+Generate the query-to-identifier (learning to retrieve) data:
+```bash
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2automatic_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type automatic_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2automatic_id_dict.pkl
+```
+Training with the openflamingo deepspeed environment.
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -u -m torch.distributed.run --nnodes=1 --nproc_per_node=4 ./open_flamingo_deepspeed/train/train.py \
+    --lm_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+    --tokenizer_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+    --model_family flamingo \
+    --cross_attn_every_n_layers 1 \
+    --dataset_resampled \
+    --batch_size_t2id 64 \
+    --train_num_samples_t2id 600000 \
+    --workers=4 \
+    --deepspeed \
+    --deepspeed_stage 3 \
+    --run_name "./checkpoints/deepspeed3_bf16_t2id_automaticID_CLIP_initial" \
+    --precision bf16 \
+    --num_epochs 5 \
+    --gradient_checkpointing \
+    --pretrained_checkpoint openflamingo/OpenFlamingo-3B-vitl-mpt1b \
+    --learning_rate 1e-4 \
+    --lr_scheduler linear \
+    --warmup_steps  500 \
+    --t2id_shards "./data/Openflamingo_format/flicker/flicker30k_t2automatic_id/{000000000..000000030}.tar" \
+    --new_class_embed \
+    --loss Classifier_loss \
+    --wandb_project Gen_Cross_Modal-Retrieval \
+    --delete_previous_checkpoint \
+    --report_to_wandb
+```
+Inference with the openflamingo environment.
+```bash
+eval "$(conda shell.bash hook)"
+conda activate openflamingo
+for file in $(find ./checkpoints/deepspeed3_bf16_t2id_automaticID_CLIP_initial); do
+    if [ -d "$file" ] && [ "$file" != "./checkpoints/deepspeed3_bf16_t2id_automaticID_CLIP_initial" ]; then
+        echo $file
+        CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nnodes=1 --nproc_per_node=4 --master_port=1997 ./open_flamingo/open_flamingo/eval/evaluate.py \
+            --vision_encoder_path ViT-L-14 \
+            --vision_encoder_pretrained openai\
+            --lm_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+            --lm_tokenizer_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+            --cross_attn_every_n_layers 1 \
+            --checkpoint_path $file \
+            --results_file results.json \
+            --precision fp32 \
+            --batch_size 8 \
+            --eval_flickr_t2id_classifier \
+            --new_class_embed \
+            --shots 0 \
+            --flickr_image_dir_path "./data/Flickr30K/flickr30k-images" \
+            --flickr_karpathy_json_path "./data/dataset_flickr30k.json" \
+            --flickr_annotations_json_path "./data/dataset_flickr30k_coco_style.json" \
+            --image_name2id_dict "./data/Openflamingo_format/flicker/image_name2automatic_id_dict.pkl" \
+            --id2image_name_dict "./data/Openflamingo_format/flicker/automatic_id2image_name_dict.pkl"
+    fi
+done
+eval "$(conda shell.bash hook)"
+conda activate openflamingo_deepspeed
+```
