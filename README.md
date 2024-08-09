@@ -49,8 +49,8 @@ Our experiments are conducted on public Flickr30k and MS-COCO datasets, that pro
 ├── Flickr30K/ # directory for Flickr images  
 ├── CoCo/ # directory for coco images  
 ├── Openflamingo_format/ #directory for processed files  
-│   ├── flicker/ 
-│   ├── coco/ 
+│   ├── flicker/  
+│   ├── coco/  
 ————————————————  
 All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
 ## Data process, training, and inference
