@@ -48,6 +48,10 @@ Create the conda environment for openflamingo deepspeed training:
 cd open_flamingo_deepspeed
 conda env create -f environment.yml
 ```
+Activate the openflamingo_deepspeed environment:  
+```commandline
+conda activate openflamingo_deepspeed
+```
 ## Dataset
 Our experiments are conducted on public Flickr30k and MS-COCO datasets, that produced by [Andrej Karpathy](http://cs.stanford.edu/people/karpathy/deepimagesent/). The raw images can be downloaded from their original sources [here](http://shannon.cs.illinois.edu/DenotationGraph/) and [here](http://mscoco.org/).  The downloaded data is expected to be organized into the ./data/ directory as follows:  
 ├── dataset_coco.json  
