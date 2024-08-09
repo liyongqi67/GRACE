@@ -15,7 +15,7 @@ All code, data, and checkpoints of the above works are open-released:
 You could also refer to our preprint works on generative retrieval.
 ```
 A Survey of Generative Search and Recommendation in the Era of Large Language Models.
-Revolutionizing Text-to-Image Retrieval as Autoregressive Token-to-Voken Generation
+Revolutionizing Text-to-Image Retrieval as Autoregressive Token-to-Voken Generation.
 ```
 
 
