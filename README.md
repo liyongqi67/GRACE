@@ -33,8 +33,28 @@ As a result, we created two separate Open-Flamingo files: one for training (usin
 We use Conda to switch between the two Open-Flamingo environments.
 
 ## Install
+Create the conda environment for openflamingo inference:
 ```commandline
-
+cd open_flamingo
+conda env create -f environment.yml
 ```
-## Data
-Our experiments are conducted on public Flickr30k and MS-COCO datasets, that produced by [Andrej Karpathy](http://cs.stanford.edu/people/karpathy/deepimagesent/). The raw images can be downloaded from their original sources [here](http://shannon.cs.illinois.edu/DenotationGraph/) and [here](http://mscoco.org/).
+Create the conda environment for openflamingo deepspeed training:
+```commandline
+cd open_flamingo_deepspeed
+conda env create -f environment.yml
+```
+## Dataset
+Our experiments are conducted on public Flickr30k and MS-COCO datasets, that produced by [Andrej Karpathy](http://cs.stanford.edu/people/karpathy/deepimagesent/). The raw images can be downloaded from their original sources [here](http://shannon.cs.illinois.edu/DenotationGraph/) and [here](http://mscoco.org/).  The downloaded data is expected to be organized into the ./data/ directory as follows:  
+├── dataset_coco.json  
+├── dataset_flickr8k.json  
+├── dataset_flickr30k.json  
+├── dataset_flickr30k_coco_style.json  
+├── Flickr30K/ # directory for Flickr images  
+├── CoCo/ # directory for coco images  
+├── Openflamingo_format/ #directory for processed files  
+————————————————  
+All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
+## Data process, training, and inference
+### For numeric identifiers in the Flickr dataset
+
+
