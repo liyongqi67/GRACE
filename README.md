@@ -73,13 +73,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nnodes=1 --nproc_per_node=4 ./open_flami
   --batch_size_mmc4 64 \
   --train_num_samples_mmc4 1200000 \
   --workers=4 \
-  --run_name ./data/checkpoints/flicker30k_i2t \
+  --run_name ./checkpoints/flicker30k_i2t \
   --learning_rate 1e-4 \
   --lr_scheduler constant \
-  --num_epochs 1 \
+  --num_epochs 3 \
   --warmup_steps  100 \
   --mmc4_textsim_threshold 0.01 \
-  --mmc4_shards "./data/Openflamingo_format/coco/flicker30k_i2t/{000000000..000000082}.tar" \
+  --mmc4_shards "./data/Openflamingo_format/coco/flicker30k_i2t/{000000000..0000000xx}.tar" \
   --logging_steps 1 \
   --mmc4_max_num_images 1 \
   --precision bf16 \
@@ -97,7 +97,7 @@ CUDA_VISIBLE_DEVICES=1 torchrun --nnodes=1 --nproc_per_node=1 --master_port=1996
     --lm_path anas-awadalla/mpt-1b-redpajama-200b \
     --lm_tokenizer_path anas-awadalla/mpt-1b-redpajama-200b \
     --cross_attn_every_n_layers 1 \
-    --checkpoint_path ./data/checkpoints/flicker30k_i2t/checkpoint_2.pt \
+    --checkpoint_path ./checkpoints/flicker30k_i2t/checkpoint_2.pt \
     --results_file results.json \
     --precision fp32 \
     --batch_size 8 \
@@ -192,8 +192,7 @@ python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ./data/Ope
 ```
 Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
 ```bash
-python get_trie_dict_4structured_id.py --output_dir "../
-data/Openflamingo_format/flicker/string_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2string_id_dict.pkl --identifier_type string_identifier
+python get_trie_dict_4structured_id.py --output_dir "./data/Openflamingo_format/flicker/string_id_trie_test_set.pkl" --json_file ./data/dataset_flickr30k.json --image_name2id_dict ./data/Openflamingo_format/flicker/image_name2string_id_dict.pkl --identifier_type string_identifier
 ```
 Training with the openflamingo deepspeed environment.
 ```bash
@@ -219,7 +218,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -u -m torch.distributed.run --nnodes=1 --npr
     --lr_scheduler linear \
     --warmup_steps  500 \
     --i2id_shards "./data/Openflamingo_format/flicker/flicker30k_i2string_id/{000000000..00000006}.tar" \
-    --t2id_shards ".data/Openflamingo_format/flicker/flicker30k_t2string_id/{000000000..000000030}.tar" \
+    --t2id_shards "./data/Openflamingo_format/flicker/flicker30k_t2string_id/{000000000..000000030}.tar" \
     --wandb_project Gen_Cross_Modal-Retrieval \
     --delete_previous_checkpoint \
     --report_to_wandb
