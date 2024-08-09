@@ -49,13 +49,15 @@ Our experiments are conducted on public Flickr30k and MS-COCO datasets, that pro
 ├── Flickr30K/ # directory for Flickr images  
 ├── CoCo/ # directory for coco images  
 ├── Openflamingo_format/ #directory for processed files  
+│   ├── flicker/ 
+│   ├── coco/ 
 ————————————————  
 All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
 ## Data process, training, and inference
 ### Pseudo-query
 We train the openflamingo to generate the pseudo-queries for test images.  
 The pseudo queries serve as the semantic identifiers and are also used to enhance the memorization of the test images. 
-You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets ([link] (https://drive.google.com/drive/folders/1Lhsk2tiZcvJUKogAtHKtp1HnSCrV3itA?usp=sharing)).  
+You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets ([link](https://drive.google.com/drive/folders/1Lhsk2tiZcvJUKogAtHKtp1HnSCrV3itA?usp=sharing)).  
 Or you could also train the model to generate the pseudo-queries as follows.  
 Generate the image-to-caption data:
 ```bash
