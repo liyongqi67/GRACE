@@ -10,20 +10,17 @@ Distillation Enhanced Generative Retrieval. ACL 2024 findings (DGR).
 All code, data, and checkpoints of the above works are open-released:  
 1. MINDER, LTRGR, and DGR, are a series of works on text retrieval. LTRGR and DGR are continuously training based on the MINDER model, so we release MINDER, LTRGR, and DGR together in the same repository https://github.com/liyongqi67/MINDER.  
 2. GCoQA is the work on conversational retrieval and is released at https://github.com/liyongqi67/GCoQA.  
-3. GRACE is the work on cross-modal retrieval and I am organizing the code.
+3. GRACE is the work on cross-modal retrieval and is released at https://github.com/liyongqi67/GRACE.
 # GRACE
 This is the official implementation for the paper "Generative Cross-Modal Retrieval: Memorizing Images in Multimodal Language Models for Retrieval and Beyond".  
 The preprint version is released in [Arxiv](Acknowledgments).  
 If you find our paper or code helpful, please consider citing as follows:
 ```bibtex
-@inproceedings{li-etal-2023-multiview,
-    title = "Multiview Identifiers Enhanced Generative Retrieval",
-    author = "Li, Yongqi  and Yang, Nan  and Wang, Liang  and Wei, Furu  and Li, Wenjie",
-    booktitle = "Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
-    month = jul,
-    year = "2023",
-    publisher = "Association for Computational Linguistics",
-    pages = "6636--6648",
+@article{li2024generative,
+  title={Generative cross-modal retrieval: Memorizing images in multimodal language models for retrieval and beyond},
+  author={Li, Yongqi and Wang, Wenjie and Qu, Leigang and Nie, Liqiang and Li, Wenjie and Chua, Tat-Seng},
+  journal={arXiv preprint arXiv:2402.10805},
+  year={2024}
 }
 ```
 ## Description
@@ -58,7 +55,7 @@ All the training data is processed from the original data and stored into ./data
 ### Pseudo-query
 We train the openflamingo to generate the pseudo-queries for test images.  
 The pseudo queries serve as the semantic identifiers and are also used to enhance the memorization of the test images. 
-You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets.  
+You could directly download our predicted pseudo-queries for Flicker30k and CoCo datasets ([link] (https://drive.google.com/drive/folders/1Lhsk2tiZcvJUKogAtHKtp1HnSCrV3itA?usp=sharing)).  
 Or you could also train the model to generate the pseudo-queries as follows.  
 Generate the image-to-caption data:
 ```bash
