@@ -56,5 +56,44 @@ Our experiments are conducted on public Flickr30k and MS-COCO datasets, that pro
 All the training data is processed from the original data and stored into ./data/Openflamingo_format/.
 ## Data process, training, and inference
 ### For numeric identifiers in the Flickr dataset
-
-
+Generate the image-to-identifier (learning to memorize) data:
+```bash
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_i2numeric_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type numeric_identifier
+```
+Generate the query-to-identifier (learning to retrieve) data:
+```bash
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/flicker/flicker30k_t2numeric_id --json_file ../data/dataset_flickr30k.json --image_dir ../data/Flickr30K/flickr30k-images --identifier_type numeric_identifier --pseudo_query ../data/Openflamingo_format/flicker/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl
+```
+Generate a trie dictionary of identifiers for images in the test set to use for constrained generation.
+```bash
+python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/flicker/numeric_id_trie_test_set.pkl" --json_file ../data/dataset_flickr30k.json --image_name2id_dict ../data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl --identifier_type numeric_identifier
+```
+Training with the openflamingo deepspeed environment.
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -u -m torch.distributed.run --nnodes=1 --nproc_per_node=4 ./open_flamingo_deepspeed/train/train.py \
+    --lm_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+    --tokenizer_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+    --model_family flamingo \
+    --cross_attn_every_n_layers 1 \
+    --dataset_resampled \
+    --batch_size_i2id 16 \
+    --train_num_samples_i2id 200000 \
+    --batch_size_t2id 48 \
+    --train_num_samples_t2id 600000 \
+    --workers=4 \
+    --deepspeed \
+    --deepspeed_stage 3 \
+    --run_name "./checkpoints/deepspeed3_bf16_i2id_t2id_numeric_id" \
+    --precision bf16 \
+    --num_epochs 5 \
+    --gradient_checkpointing \
+    --pretrained_checkpoint openflamingo/OpenFlamingo-3B-vitl-mpt1b \
+    --learning_rate 1e-4 \
+    --lr_scheduler linear \
+    --warmup_steps  500 \
+    --i2id_shards "./data/Openflamingo_format/flicker/flicker30k_i2numeric_id/{000000000..00000006}.tar" \
+    --t2id_shards "./data/Openflamingo_format/flicker/flicker30k_t2numeric_id/{000000000..000000030}.tar" \
+    --wandb_project Gen_Cross_Modal-Retrieval \
+    --delete_previous_checkpoint \
+    --report_to_wandb
+```
