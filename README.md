@@ -97,3 +97,33 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -u -m torch.distributed.run --nnodes=1 --npr
     --delete_previous_checkpoint \
     --report_to_wandb
 ```
+Inference with the openflamingo environment.
+```bash
+eval "$(conda shell.bash hook)"
+conda activate openflamingo
+for file in $(find ./checkpoints/deepspeed3_bf16_i2id_t2id_numeric_id); do
+    if [ -d "$file" ] && [ "$file" != "./checkpoints/deepspeed3_bf16_i2id_t2id_numeric_id" ]; then
+        echo $file
+        CUDA_VISIBLE_DEVICES=0,1,2,3 torchrun --nnodes=1 --nproc_per_node=4 --master_port=1997 ./open_flamingo/open_flamingo/eval/evaluate.py \
+            --vision_encoder_path ViT-L-14 \
+            --vision_encoder_pretrained openai\
+            --lm_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+            --lm_tokenizer_path anas-awadalla/mpt-1b-redpajama-200b-hf-style \
+            --cross_attn_every_n_layers 1 \
+            --checkpoint_path $file \
+            --results_file results.json \
+            --precision fp32 \
+            --batch_size 8 \
+            --eval_flickr_t2id \
+            --shots 0 \
+            --flickr_image_dir_path "./data/Flickr30K/flickr30k-images" \
+            --flickr_karpathy_json_path "./data/dataset_flickr30k.json" \
+            --flickr_annotations_json_path "./data/dataset_flickr30k_coco_style.json" \
+            --image_name2id_dict "./data/Openflamingo_format/flicker/image_name2numeric_id_dict.pkl" \
+            --id2image_name_dict "./data/Openflamingo_format/flicker/numeric_id2image_name_dict.pkl" \
+            --decoder_trie_path "./data/Openflamingo_format/flicker/numeric_id_trie_test_set.pkl"
+    fi
+done
+eval "$(conda shell.bash hook)"
+conda activate openflamingo_deepspeed
+```
