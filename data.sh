@@ -1,0 +1,15 @@
+#!/bin/sh
+
+
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/coco/coco_i2semantic_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images --identifier_type semantic_identifier --pseudo_query ../data/Openflamingo_format/coco/pseudo_query.json --coco
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/coco/coco_t2semantic_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images --identifier_type semantic_identifier --pseudo_query ../data/Openflamingo_format/coco/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2semantic_id/image_name2semantic_id_dict.pkl --coco
+python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/coco/semantic_id_trie_test_set.pkl" --json_file ../data/dataset_coco.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2semantic_id/image_name2semantic_id_dict.pkl --identifier_type semantic_identifier
+
+
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/coco/coco_i2string_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images --identifier_type string_identifier
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/coco/coco_t2string_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images  --identifier_type string_identifier --pseudo_query ../data/Openflamingo_format/coco/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2string_id/image_name2string_id_dict.pkl --coco
+python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/coco/string_id_trie_test_set.pkl" --json_file ../data/dataset_coco.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2string_id/image_name2string_id_dict.pkl --identifier_type string_identifier
+
+python ./data_process/convert_flicker30k_to_wds_i2id7.py --output_dir ../data/Openflamingo_format/coco/coco_i2numeric_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images --identifier_type numeric_identifier
+python ./data_process/convert_flicker30k_to_wds_t2id7.py --output_dir ../data/Openflamingo_format/coco/coco_t2numeric_id --json_file ../data/dataset_coco.json --image_dir /ssd4/yqli/CoCo/coco_images  --identifier_type numeric_identifier --pseudo_query ../data/Openflamingo_format/coco/pseudo_query.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2numeric_id/image_name2numeric_id_dict.pkl --coco
+python get_trie_dict_4structured_id.py --output_dir "../data/Openflamingo_format/coco/numeric_id_trie_test_set.pkl" --json_file ../data/dataset_coco.json --image_name2id_dict ../data/Openflamingo_format/coco/coco_i2numeric_id/image_name2numeric_id_dict.pkl --identifier_type numeric_identifier
