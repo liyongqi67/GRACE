@@ -404,7 +404,7 @@ for file in $(find ./checkpoints/deepspeed3_bf16_i2id_t2id_structured_id); do
              --eval_flickr_t2id \
              --shots 0 \
              --flickr_image_dir_path "./data/Flickr30K/flickr30k-images" \
-             --flickr_karpathy_json_path "../AutoregressiveImageRetrieval/data/dataset_flickr30k.json" \
+             --flickr_karpathy_json_path "./data/dataset_flickr30k.json" \
              --flickr_annotations_json_path "./data/dataset_flickr30k_coco_style.json" \
              --image_name2id_dict "./data/Openflamingo_format/flicker/image_name2structured_id_dict.pkl" \
              --id2image_name_dict "./data/Openflamingo_format/flicker/structured_id2image_name_dict.pkl" \
