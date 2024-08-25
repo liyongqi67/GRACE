@@ -38,7 +38,7 @@ As a result, we created two separate Open-Flamingo files: one for training (usin
 We use Conda to switch between the two Open-Flamingo environments.
 
 ## Install
-Create the conda environment for openflamingo inference:
+Create the conda environment for openflamingo inference and data processing:
 ```commandline
 cd open_flamingo
 conda env create -f environment.yml
@@ -48,7 +48,11 @@ Create the conda environment for openflamingo deepspeed training:
 cd open_flamingo_deepspeed
 conda env create -f environment.yml
 ```
-Activate the openflamingo_deepspeed environment:  
+**Please activate the openflamingo environment for before data processing and inference!**
+```commandline
+conda activate openflamingo
+```
+**Please activate the openflamingo_deepspeed environment before training!**
 ```commandline
 conda activate openflamingo_deepspeed
 ```
